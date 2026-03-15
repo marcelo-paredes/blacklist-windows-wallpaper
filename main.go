@@ -57,10 +57,10 @@ func main() {
 	for {
 		err = windows.RegNotifyChangeKeyValue(
 			keyHandle,
-			false,                                                             // bWatchSubtree: true to watch subkeys as well
+			false, // bWatchSubtree: true to watch subkeys as well
 			windows.REG_NOTIFY_CHANGE_NAME|windows.REG_NOTIFY_CHANGE_LAST_SET, // dwNotifyFilter: Notify on name or value changes
-			event,                                                             // hEvent: The event to signal
-			true,                                                              // fAsynchronous: true for asynchronous operation
+			event, // hEvent: The event to signal
+			true,  // fAsynchronous: true for asynchronous operation
 		)
 		if err != nil {
 			log.Fatalf("Failed to set registry notification: %v", err)

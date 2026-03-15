@@ -12,6 +12,6 @@ and run.
 
 ## Possible Improvements
 
-- [ ] Add a command line argument to specify the blacklisted wallpaper name.
-- [ ] Add a command line argument to specify the directory where the wallpapers are stored.
+- [x] Add a command line argument to specify the blacklisted wallpaper name.
+- [ ] Add a command line argument to specify containing a list of blacklisted wallpapers.
 - [ ] Find why the call to "setWallPaper" needs to be done twice and fix.

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"strings"
@@ -13,16 +14,22 @@ import (
 )
 
 const (
-	SPI_SETWALLPAPER = 0x0014
+	CONTROL_PANEL_DESKTOP         = "Control Panel\\Desktop"
+	KEY_WALLPAPER                 = "WallPaper"
+	DEFAULT_BLACKLISTED_WALLPAPER = "C:\\Temp\\downloadedWallpaper.jpg"
+	SPI_SETWALLPAPER              = 0x0014
 )
 
 func main() {
-
+	blacklist := flag.Args()
+	if len(blacklist) == 0 {
+		blacklist = append(blacklist, DEFAULT_BLACKLISTED_WALLPAPER)
+	}
 	user32 := syscall.NewLazyDLL("user32.dll")
 	systemParametersInfo := user32.NewProc("SystemParametersInfoW")
 	_ = systemParametersInfo.Find()
 
-	k, err := registry.OpenKey(windows.HKEY_CURRENT_USER, "Control Panel\\Desktop", registry.NOTIFY|registry.QUERY_VALUE /*|registry.SET_VALUE*/)
+	k, err := registry.OpenKey(windows.HKEY_CURRENT_USER, CONTROL_PANEL_DESKTOP, registry.NOTIFY|registry.QUERY_VALUE /*|registry.SET_VALUE*/)
 
 	if err != nil {
 
@@ -38,7 +45,7 @@ func main() {
 
 	defer cleanupKey(keyHandle)
 
-	fileName, _, _ := k.GetStringValue("WallPaper")
+	fileName, _, _ := k.GetStringValue(KEY_WALLPAPER)
 	fmt.Printf("Current WallPaper: %s\n", fileName)
 
 	event, err := windows.CreateEvent(nil, 1, 0, nil) // manualReset=1, initialState=0
@@ -57,10 +64,10 @@ func main() {
 	for {
 		err = windows.RegNotifyChangeKeyValue(
 			keyHandle,
-			false, // bWatchSubtree: true to watch subkeys as well
+			false,                                                             // bWatchSubtree: true to watch subkeys as well
 			windows.REG_NOTIFY_CHANGE_NAME|windows.REG_NOTIFY_CHANGE_LAST_SET, // dwNotifyFilter: Notify on name or value changes
-			event, // hEvent: The event to signal
-			true,  // fAsynchronous: true for asynchronous operation
+			event,                                                             // hEvent: The event to signal
+			true,                                                              // fAsynchronous: true for asynchronous operation
 		)
 		if err != nil {
 			log.Fatalf("Failed to set registry notification: %v", err)
@@ -92,10 +99,18 @@ func main() {
 				if lastErr != nil {
 					fmt.Printf("Error: %s\n", lastErr)
 				}
-				//_ = k.SetStringValue("WallPaper", fileName)
 			}
 
-			if strings.EqualFold(wallpaper, "C:\\Temp\\downloadedWallpaper.jpg") {
+			matchesBlacklistedWallpaper := func(wallpaperFileName string) bool {
+				for _, blacklistedWallpaper := range blacklist {
+					if strings.EqualFold(wallpaper, blacklistedWallpaper) {
+						return true
+					}
+				}
+				return false
+			}
+
+			if matchesBlacklistedWallpaper(wallpaper) {
 				fmt.Println("resetting to " + fileName)
 				setWallPaper(fileName)
 				setWallPaper(fileName)

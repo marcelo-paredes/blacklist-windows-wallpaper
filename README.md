@@ -4,6 +4,11 @@ This small utility will bring back your
 current wallpaper if changed to a specific
 blacklisted one (by filename).
 
+```
+IMPORTANT: This utility is meant for Windows only.
+```
+
+
 ## Usage
 
 To use a list of blacklisted wallpapers,
@@ -22,7 +27,7 @@ wallpaper.jpg
 other/wallpaper.jpg
 ```
 
-## Possible Improvements
+## Possible Improvements so far
 
 - [x] Add a command line argument to specify the blacklisted wallpaper name.
 - [x] Add a command line argument to specify containing a list of blacklisted wallpapers.

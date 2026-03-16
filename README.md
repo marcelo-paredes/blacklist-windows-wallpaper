@@ -6,9 +6,21 @@ blacklisted one (by filename).
 
 ## Usage
 
-For now, edit the code to change the
-blacklisted wallpaper name, then compile
-and run.
+To use a list of blacklisted wallpapers,
+```powershell
+blacklist-windows-wallpaper.exe --blacklist "path/to/wallpaper.jpg" --blacklist "path/to/other/wallpaper.jpg"
+```
+
+To use a list of blacklisted wallpapers from a file
+```powershell
+blacklis-windows-wallpaper.exe --blacklist "@path/to/blacklist.txt"
+```
+
+where the contents of `blacklist.txt` is something like
+```text
+wallpaper.jpg
+other/wallpaper.jpg
+```
 
 ## Possible Improvements
 

@@ -1,4 +1,4 @@
-module bring-it-back-w
+module blacklis-windows-wallpaper
 
 go 1.26
 

@@ -73,7 +73,7 @@ func main() {
 	systemParametersInfo := user32.NewProc("SystemParametersInfoW")
 	_ = systemParametersInfo.Find()
 
-	k, err := registry.OpenKey(windows.HKEY_CURRENT_USER, CONTROL_PANEL_DESKTOP, registry.NOTIFY|registry.QUERY_VALUE /*|registry.SET_VALUE*/)
+	k, err := registry.OpenKey(registry.CURRENT_USER, CONTROL_PANEL_DESKTOP, registry.NOTIFY|registry.QUERY_VALUE /*|registry.SET_VALUE*/)
 
 	if err != nil {
 

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"syscall"
 	"time"
@@ -20,11 +22,53 @@ const (
 	SPI_SETWALLPAPER              = 0x0014
 )
 
+type fileList []string
+
+func (f *fileList) Set(value string) error {
+	*f = append(*f, value)
+	return nil
+}
+
+func (f *fileList) String() string {
+	return strings.Join(*f, ",")
+}
+
 func main() {
-	blacklist := flag.Args()
+	var blacklist fileList
+	flag.Var(&blacklist, "blacklist", "List of blacklisted wallpapers")
+	flag.Parse()
 	if len(blacklist) == 0 {
 		blacklist = append(blacklist, DEFAULT_BLACKLISTED_WALLPAPER)
 	}
+
+	var blackListedWallpapers []string = []string{}
+	for _, blacklistedWallpaper := range blacklist {
+		if blacklistedWallpaper[0] == '@' {
+			blacklistedWallpaper = blacklistedWallpaper[1:]
+			_, err := os.Stat(blacklistedWallpaper)
+			if err != nil {
+				blackListedWallpapers = append(blackListedWallpapers, blacklistedWallpaper)
+			} else {
+				f, err := os.Open(blacklistedWallpaper)
+				if err == nil {
+					scanner := bufio.NewScanner(f)
+					for scanner.Scan() {
+						line := scanner.Text()
+						if strings.TrimSpace(line) == "" {
+							continue
+						}
+						blackListedWallpapers = append(blackListedWallpapers, line)
+					}
+					_ = f.Close()
+				}
+			}
+		} else {
+			blackListedWallpapers = append(blackListedWallpapers, blacklistedWallpaper)
+		}
+	}
+
+	fmt.Printf("Blacklisted wallpapers: %s\n", strings.Join(blackListedWallpapers, ", "))
+
 	user32 := syscall.NewLazyDLL("user32.dll")
 	systemParametersInfo := user32.NewProc("SystemParametersInfoW")
 	_ = systemParametersInfo.Find()
@@ -102,7 +146,7 @@ func main() {
 			}
 
 			matchesBlacklistedWallpaper := func(wallpaperFileName string) bool {
-				for _, blacklistedWallpaper := range blacklist {
+				for _, blacklistedWallpaper := range blackListedWallpapers {
 					if strings.EqualFold(wallpaper, blacklistedWallpaper) {
 						return true
 					}
